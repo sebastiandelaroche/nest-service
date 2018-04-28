@@ -1,0 +1,17 @@
+version: '3'
+services:
+  nest-serice:
+    build: .
+    ports:
+     - 3000:3000
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    ports:
+      - 4369:4369
+      - 5671:5671
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: pass
