@@ -1,15 +1,21 @@
 import { Component } from '@nestjs/common';
-import { User } from '../interfaces/user.interface';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../commands/CreateUserCommand';
 
 @Component()
 export class UserService {
-    private users: User[] = [];
 
-    create(user: User) {
-        this.users.push(user);
+    constructor(
+        private readonly commandBus: CommandBus,
+    ) { }
+
+    async create(user: any): Promise<any> {
+        return await this.commandBus.execute(
+            new CreateUserCommand('12345', 'Sebastian'),
+        );
     }
 
-    findAll(): User[] {
-        return this.users;
+    findAll(): any[] {
+        return [];
     }
 }

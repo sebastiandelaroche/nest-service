@@ -1,10 +1,11 @@
 import * as amqp from 'amqplib';
 import { Server, CustomTransportStrategy } from '@nestjs/microservices';
-import { Observable } from 'rxjs/Observable';
+import { bus as createBus } from '@friends-learning/bus';
 
 export class RabbitMQServer extends Server implements CustomTransportStrategy {
     private server: amqp.Connection = null;
     private channel: amqp.Channel = null;
+    private bus: any;
 
     constructor(
         private readonly host: string,
@@ -14,40 +15,30 @@ export class RabbitMQServer extends Server implements CustomTransportStrategy {
 
     public async listen(callback: () => void) {
         await this.init();
-        this.channel.consume(`${this.queue}_sub`, this.handleMessage.bind(this), {
-            noAck: true,
-        });
+        await this.bus.subscribe('createUser', this.handleMessage.bind(this));
+        callback();
     }
 
     public close() {
-        this.channel && this.channel.close();
-        this.server && this.server.close();
+        // TODO: in @friends-learning/bus missing close rabbitmq connections
+        this.bus.connection && this.bus.connection.close();
     }
 
-    private async handleMessage(message) {
-        const { content } = message;
-        const messageObj = JSON.parse(content.toString());
-
-        const handlers = this.getHandlers();
-        const pattern = JSON.stringify(messageObj.pattern);
-        if (!this.messageHandlers[pattern]) {
-            return;
+    private async handleMessage(message, ack, nack) {
+        try {
+            const { content } = message;
+            const messageObj = JSON.parse(content.toString());
+            ack();
+        } catch (error) {
+            nack();
         }
-
-        const handler = this.messageHandlers[pattern];
-        const response$ = this.transformToObservable(await handler(messageObj.data)) as Observable<any>;
-        response$ && this.send(response$, (data) => this.sendMessage(data));
-    }
-
-    private sendMessage(message) {
-        const buffer = Buffer.from(JSON.stringify(message));
-        this.channel.sendToQueue(`${this.queue}_pub`, buffer);
     }
 
     private async init() {
-        this.server = await amqp.connect(this.host);
-        this.channel = await this.server.createChannel();
-        this.channel.assertQueue(`${this.queue}_sub`, { durable: false });
-        this.channel.assertQueue(`${this.queue}_pub`, { durable: false });
+        this.bus = await createBus({
+            url: process.env.MESSAGE_BROKER_URL,
+            service: 'nest-service',
+            context: 'nest',
+        });
     }
 }

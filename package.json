@@ -8,13 +8,14 @@
     "dev": "nodemon",
     "pre-prod": "rm -rf dist && tsc",
     "prod": "node dist/main.js",
-    "docker-dev": "docker-compose up rabbitmq"
+    "docker-dev": "docker-compose up rabbitmq mongodb"
   },
   "dependencies": {
-    "@nestjs/common": "^4.6.6",
-    "@nestjs/core": "^4.6.6",
-    "@nestjs/microservices": "^4.6.6",
-    "@nestjs/testing": "^4.6.6",
+    "@nestjs/common": "5.0.1",
+    "@nestjs/core": "5.0.1",
+    "@nestjs/cqrs": "5.0.1",
+    "@nestjs/microservices": "5.0.1",
+    "@nestjs/testing": "5.0.1",
     "amqplib": "^0.5.2",
     "dotenv-safe": "^5.0.1",
     "reflect-metadata": "^0.1.12",
