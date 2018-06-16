@@ -44,9 +44,9 @@ export class AppModule implements OnModuleInit {
             CreateUserCommandHandler,
         ]);
 
-        // this.event$.combineSagas([
-        //     this.userSaga.created,
-        // ]);
+        this.event$.combineSagas([
+            this.userSaga.created,
+        ]);
 
     }
 

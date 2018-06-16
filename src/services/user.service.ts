@@ -10,9 +10,11 @@ export class UserService {
     ) { }
 
     async create(user: any): Promise<any> {
-        return await this.commandBus.execute(
+        this.commandBus.execute(
             new CreateUserCommand('12345', 'Sebastian'),
         );
+
+        return Promise.resolve({});
     }
 
     findAll(): any[] {
